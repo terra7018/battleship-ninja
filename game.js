@@ -227,8 +227,8 @@ function renderShipList() {
     const placed = ship.cells.length > 0;
     btn.className = (placed ? "placed" : "") + (state.selectedShip === i ? " selected" : "");
     btn.addEventListener("click", () => {
-      if (placed) unplaceShip(state.player, i);
       state.selectedShip = i;
+      setStatus(placed ? `Click a cell to reposition the ${ship.name}.` : `Place the ${ship.name}.`);
       render();
     });
     li.appendChild(btn);
@@ -262,9 +262,9 @@ function render() {
 function previewPlacement(i) {
   if (state.phase !== "setup" || state.selectedShip === null) return;
   const ship = state.player.ships[state.selectedShip];
-  if (ship.cells.length) return;
+  const own = new Set(ship.cells);
   const cells = shipCells(i, ship.size, state.horizontal);
-  const ok = cells && cells.every(c => state.player.occupancy[c] === -1);
+  const ok = cells && cells.every(c => state.player.occupancy[c] === -1 || own.has(c));
   const target = cells || [i];
   target.forEach(c => {
     el.playerBoard.children[c].classList.add(ok ? "preview" : "preview-bad");
@@ -283,10 +283,17 @@ function onPlayerBoardClick(i) {
   if (state.phase !== "setup" || state.selectedShip === null) return;
   const shipIndex = state.selectedShip;
   const ship = state.player.ships[shipIndex];
-  if (ship.cells.length) unplaceShip(state.player, shipIndex);
+  const previousCells = ship.cells;
+  if (previousCells.length) unplaceShip(state.player, shipIndex);
   const cells = canPlace(state.player, i, ship.size, state.horizontal);
   if (!cells) {
-    setStatus("That placement doesn't fit. Try another cell.");
+    if (previousCells.length) {
+      placeShip(state.player, shipIndex, previousCells);
+      setStatus(`That placement doesn't fit. The ${ship.name} stays where it was.`);
+    } else {
+      setStatus("That placement doesn't fit. Try another cell.");
+    }
+    clearPreview();
     render();
     return;
   }
