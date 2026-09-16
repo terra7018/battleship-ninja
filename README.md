@@ -28,6 +28,15 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
+## Tests
+
+Headless tests for setup-phase placement (jsdom, no browser needed):
+
+```bash
+npm install
+npm test
+```
+
 ## Files
 
 - `index.html` — markup and layout
