@@ -88,7 +88,8 @@ kbd {
 
 .board {
   display: grid;
-  grid-template-columns: repeat(10, 1fr);
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-rows: repeat(10, minmax(0, 1fr));
   gap: 2px;
   background: var(--sea-line);
   border: 2px solid var(--sea-line);
@@ -107,8 +108,12 @@ kbd {
   align-items: center;
   justify-content: center;
   font-size: clamp(.5rem, 2vw, .8rem);
+  line-height: 1;
   color: #04202c;
   font-weight: 700;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .board.enemy .cell:not(.hit):not(.miss):not(.sunk) { cursor: crosshair; }
@@ -116,7 +121,7 @@ kbd {
 
 .cell.ship { background: var(--ship); }
 .cell.miss { background: var(--miss); }
-.cell.miss::after { content: "•"; color: #38566d; font-size: 1.4em; }
+.cell.miss::after { content: "•"; color: #38566d; font-size: 1.4em; line-height: 1; }
 .cell.hit { background: var(--hit); }
 .cell.hit::after { content: "✕"; color: #fff; }
 .cell.sunk { background: var(--sunk); }

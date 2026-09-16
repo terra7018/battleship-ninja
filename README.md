@@ -37,6 +37,13 @@ npm install
 npm test
 ```
 
+A browser-based layout check (asserts every board cell keeps the same size once hits and misses are drawn) runs against a served copy of the site through Chrome's DevTools protocol on port 29229:
+
+```bash
+python3 -m http.server 8099 &
+npm run test:layout            # or: npm run test:layout -- http://localhost:8099/
+```
+
 ## Files
 
 - `index.html` — markup and layout
