@@ -4,7 +4,7 @@
   "private": true,
   "description": "Browser-based Battleship game against an AI opponent",
   "scripts": {
-    "test": "node test/placement.test.js",
+    "test": "node test/placement.test.js && node test/ai-turn.test.js",
     "test:layout": "node test/layout.test.js"
   },
   "devDependencies": {

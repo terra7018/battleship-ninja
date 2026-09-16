@@ -17,6 +17,8 @@ A browser-based Battleship game: you versus an AI opponent. Pure client-side HTM
 
 The AI runs a hunt/target search: it hunts on a checkerboard parity pattern (the smallest ship is 2 cells, so half the cells suffice to find every ship), and on a hit it switches to targeting adjacent cells. Once two hits line up it locks onto that axis and extends from both ends until the ship sinks, then returns to hunting.
 
+The AI takes 3 seconds to pick its cell, counted down in the status line, so turns feel deliberate rather than instant.
+
 ## Run locally
 
 Clone and open `index.html` directly in a browser, or serve the folder:
@@ -30,7 +32,7 @@ python3 -m http.server 8000
 
 ## Tests
 
-Headless tests for setup-phase placement (jsdom, no browser needed):
+Headless tests for setup-phase placement and the AI turn delay (jsdom, no browser needed):
 
 ```bash
 npm install

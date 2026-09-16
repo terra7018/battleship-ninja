@@ -1,6 +1,7 @@
 "use strict";
 
 const SIZE = 10;
+const AI_TURN_DELAY_MS = 3000;
 const FLEET = [
   { name: "Carrier", size: 5 },
   { name: "Battleship", size: 4 },
@@ -30,6 +31,8 @@ const el = {
 };
 
 let state;
+let aiTimer = null;
+let aiTick = null;
 
 function idx(r, c) { return r * SIZE + c; }
 function rowOf(i) { return Math.floor(i / SIZE); }
@@ -320,8 +323,25 @@ function onEnemyBoardClick(i) {
   if (allSunk(state.enemy)) { endGame(true); return; }
 
   state.phase = "ai";
-  setStatus("Enemy is taking aim…");
-  setTimeout(aiTurn, 650);
+  startAiCountdown();
+}
+
+function startAiCountdown() {
+  cancelAiTurn();
+  let left = Math.round(AI_TURN_DELAY_MS / 1000);
+  setStatus(`Enemy is taking aim… ${left}`);
+  aiTick = setInterval(() => {
+    left -= 1;
+    if (left > 0) setStatus(`Enemy is taking aim… ${left}`);
+  }, 1000);
+  aiTimer = setTimeout(() => { cancelAiTurn(); aiTurn(); }, AI_TURN_DELAY_MS);
+}
+
+function cancelAiTurn() {
+  clearTimeout(aiTimer);
+  clearInterval(aiTick);
+  aiTimer = null;
+  aiTick = null;
 }
 
 function aiTurn() {
@@ -341,6 +361,7 @@ function aiTurn() {
 }
 
 function endGame(playerWon) {
+  cancelAiTurn();
   state.phase = "over";
   setStatus(playerWon ? "Victory! Enemy fleet destroyed." : "Defeat. Your fleet is gone.");
   render();
@@ -352,6 +373,7 @@ function endGame(playerWon) {
 }
 
 function newGame() {
+  cancelAiTurn();
   state = {
     phase: "setup",
     player: newSide(),
