@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Battleship Ninja</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Battleship Ninja</h1>
+  <p id="status" class="status">Place your fleet to begin.</p>
+</header>
+
+<main>
+  <section id="setup" class="panel">
+    <h2>Deploy your fleet</h2>
+    <p class="hint">Click a ship, then click your board to place it. Press <kbd>R</kbd> or the rotate button to change orientation.</p>
+    <ul id="ship-list" class="ship-list"></ul>
+    <div class="controls">
+      <button id="rotate-btn" type="button">Rotate: Horizontal</button>
+      <button id="randomize-btn" type="button">Randomize</button>
+      <button id="clear-btn" type="button">Clear</button>
+      <button id="start-btn" type="button" disabled>Start Game</button>
+    </div>
+  </section>
+
+  <section class="boards">
+    <div class="board-wrap">
+      <h2>Your Fleet</h2>
+      <div id="player-board" class="board" aria-label="Your fleet board"></div>
+    </div>
+    <div class="board-wrap">
+      <h2>Enemy Waters</h2>
+      <div id="enemy-board" class="board enemy" aria-label="Enemy waters board"></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="legend">
+      <span><i class="sw ship"></i>Ship</span>
+      <span><i class="sw hit"></i>Hit</span>
+      <span><i class="sw miss"></i>Miss</span>
+      <span><i class="sw sunk"></i>Sunk</span>
+    </div>
+    <div class="fleets">
+      <div>
+        <h3>Your ships</h3>
+        <ul id="player-fleet" class="fleet-status"></ul>
+      </div>
+      <div>
+        <h3>Enemy ships</h3>
+        <ul id="enemy-fleet" class="fleet-status"></ul>
+      </div>
+    </div>
+    <h3>Battle log</h3>
+    <ul id="log" class="log"></ul>
+  </section>
+</main>
+
+<div id="overlay" class="overlay hidden">
+  <div class="overlay-card">
+    <h2 id="overlay-title"></h2>
+    <p id="overlay-text"></p>
+    <button id="again-btn" type="button">Play Again</button>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>
