@@ -29,11 +29,28 @@ function connect(wsUrl) {
 
 const measure = `
   (() => {
-    const cells = [...document.querySelectorAll('#enemy-board .cell')];
-    const w = cells.map(c => Math.round(c.getBoundingClientRect().width * 100) / 100);
-    const h = cells.map(c => Math.round(c.getBoundingClientRect().height * 100) / 100);
+    const round = v => Math.round(v * 10) / 10;
+    const cells = [...document.querySelectorAll('.board .cell')];
+    const w = cells.map(c => round(c.getBoundingClientRect().width));
+    const h = cells.map(c => round(c.getBoundingClientRect().height));
     return JSON.stringify({ widths: [...new Set(w)], heights: [...new Set(h)],
       boardWidth: document.getElementById('enemy-board').getBoundingClientRect().width });
+  })()
+`;
+
+// Nothing a cell's state adds may paint outside the cell box, or it visually
+// overlaps its neighbours even when the geometry is unchanged.
+const paintsInside = `
+  (() => {
+    const bad = [];
+    for (const c of document.querySelectorAll('.board .cell')) {
+      const cs = getComputedStyle(c);
+      if (parseFloat(cs.outlineWidth) > 0 && !cs.outlineStyle.includes('none')) bad.push('outline:' + cs.outline);
+      if (cs.boxShadow !== 'none' && !cs.boxShadow.includes('inset')) bad.push('boxShadow:' + cs.boxShadow);
+      const after = getComputedStyle(c, '::after');
+      if (after.content !== 'none' && after.position !== 'absolute') bad.push('marker in flow');
+    }
+    return JSON.stringify([...new Set(bad)]);
   })()
 `;
 
@@ -60,8 +77,23 @@ const measure = `
   assert.strictEqual(after.heights.length, 1, "row heights uniform after shots: " + JSON.stringify(after.heights));
   assert.deepStrictEqual(after.widths, before.widths, "cell width unchanged by shots");
   assert.strictEqual(Math.round(after.boardWidth), Math.round(before.boardWidth), "board width unchanged");
-
   console.log("ok - cell geometry constant across shots", after.widths[0] + "px");
+
+  // Worst case: every cell in every state at once, including keyboard focus.
+  await evaluate(`
+    const states = ['hit', 'miss', 'sunk', 'last-shot', 'ship', 'preview', 'preview-bad'];
+    document.querySelectorAll('.board .cell').forEach((c, i) => c.classList.add(states[i % states.length]));
+    document.querySelector('#enemy-board .cell').focus(); true`);
+  await new Promise(r => setTimeout(r, 300));
+
+  const saturated = JSON.parse(await evaluate(measure));
+  assert.deepStrictEqual(saturated.widths, before.widths, "cell width unchanged in every state");
+  assert.deepStrictEqual(saturated.heights, before.heights, "cell height unchanged in every state");
+  console.log("ok - cell geometry constant in every marker state");
+
+  const leaks = JSON.parse(await evaluate(paintsInside));
+  assert.deepStrictEqual(leaks, [], "cell decoration paints outside the cell box: " + JSON.stringify(leaks));
+  console.log("ok - no cell decoration paints outside its own box");
   client.close();
   await fetch(`http://localhost:29229/json/close/${target.id}`);
 })().catch(e => { console.error(e.message); process.exit(1); });
